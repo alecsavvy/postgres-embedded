@@ -32,8 +32,11 @@ ENV PGHOST=/var/run/postgresql \
     PGUSER=postgres \
     PGDATABASE=postgres
 
+# Switch back to root to install the entrypoint script
+USER root
+
 # Script that starts Postgres in background, waits until ready, then execs user command
-COPY <<'EOF' /usr/local/bin/with-postgres
+COPY --chmod=755 <<'EOF' /usr/local/bin/with-postgres
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -62,7 +65,8 @@ trap "echo 'Stopping...'; kill -TERM $pg_pid $app_pid 2>/dev/null" SIGTERM SIGIN
 wait -n $pg_pid $app_pid
 EOF
 
-RUN chmod +x /usr/local/bin/with-postgres
+# Switch back to postgres user for runtime
+USER postgres
 
 # tini handles signal propagation, with-postgres manages lifecycle
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/with-postgres"]
