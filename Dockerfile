@@ -10,6 +10,9 @@ RUN apt-get update && \
 RUN mkdir -p /data /var/run/postgresql && \
     chown -R postgres:postgres /data /var/run/postgresql
 
+# Add PostgreSQL binaries to PATH
+ENV PATH=/usr/lib/postgresql/15/bin:$PATH
+
 USER postgres
 
 # Initialize the Postgres data directory
